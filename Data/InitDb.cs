@@ -42,7 +42,8 @@ namespace LiteraturePlatformWebApi.Data
 
                 Composition composition = new Composition()
                 {
-                    Name = "Сomposition1",
+                    Title = "Сomposition1",
+                    Description = "Very cool book",
                     Date = DateTime.Now,
                     Genre = genre,
                     Rating = 4.3,
