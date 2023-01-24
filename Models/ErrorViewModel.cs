@@ -1,4 +1,4 @@
-namespace LiteraturePlatform.Models
+namespace LiteraturePlatformWebApi.Models
 {
     public class ErrorViewModel
     {

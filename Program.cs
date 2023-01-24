@@ -1,6 +1,12 @@
+
+using LiteraturePlatformWebApi.Data;
+using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+builder.Services.AddDbContext<LiteraturePlatformContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("LiteraturePlatformContext")));
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

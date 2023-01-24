@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace LiteraturePlatform.Models
+namespace LiteraturePlatformWebApi.Models
 {
     public class Composition
     {
