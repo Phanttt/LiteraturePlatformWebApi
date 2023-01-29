@@ -50,7 +50,7 @@ namespace LiteraturePlatformWebApi.Data
                     Text = text,
                     User = user,
                     Comments = new List<Comment>(),
-                    Image = imageData
+                    //Image = imageData
             };
                 Comment c1 = new Comment()
                 {

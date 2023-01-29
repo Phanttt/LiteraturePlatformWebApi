@@ -40,7 +40,6 @@ namespace LiteraturePlatformWebApi.Controllers
 
             }
             return null;
-            //return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
         }
         private ClaimsIdentity GetIdentity(User user)
         {

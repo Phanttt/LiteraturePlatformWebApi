@@ -2,7 +2,6 @@
 using LiteraturePlatformWebApi.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Numerics;
 
 namespace LiteraturePlatformWebApi.Controllers
 {
@@ -26,10 +25,12 @@ namespace LiteraturePlatformWebApi.Controllers
                 .Include(e => e.Genre)
                 .ToListAsync();
         }
-        [HttpGet("{id}")]
+        [HttpGet]
+        [Route("GetComposition/{id}")]
         public async Task<ActionResult<Composition>> GetComposition(int id)
         {
             return await _context.Composition.Where(e=>e.CompositionId == id)
+                .Include(e => e.Genre)
                 .Include(e => e.User)
                 .Include(e => e.Text)
                 .Include(e => e.Comments)
@@ -71,19 +72,51 @@ namespace LiteraturePlatformWebApi.Controllers
         }
 
         [HttpPost]
-        public async Task<IResult> PostComposition(Composition composition, string text)
+        [Route("CreateComposition")]
+        public async Task<IResult> CreateComposition(SendModel model)
         {
+
+            Composition composition = new Composition()
+            {
+                Title = model.title,
+                Description = model.descr
+            };
+            int userId = model.userId;
+
             Text Text = new Text()
             {
-                Content = text
+                Content = model.text
             };
             _context.Add(Text);
-            //юзера надо в контроллере добавить
-            composition.Text = Text;
 
+            User user = await _context.Users.FirstOrDefaultAsync(e => e.UserId == userId);
+            if (user == null)
+            {
+                return Results.NotFound();
+            }
+
+            composition.Image = model.imageData;
+            composition.Text = Text;
+            composition.User = user;
+            composition.Date = DateTime.Now;
+            composition.Genre = await _context.Genres.FirstOrDefaultAsync(x => x.GenreId == model.genreId);
+
+            _context.Add(composition);
+            await _context.SaveChangesAsync();
             return Results.Ok();
         }
 
+        [HttpPost]
+        [Route("AddComment")]
+        public async Task<IResult> AddComment(Comment text)
+        {            
+            var comp = await _context.Composition.FirstOrDefaultAsync(e=>e.CompositionId == text.TextId);
+            _context.Add(text);
+            comp.Text = text;
 
+            await _context.SaveChangesAsync();
+
+            return Results.Ok();
+        }
     }
 }
