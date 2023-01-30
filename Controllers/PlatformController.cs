@@ -7,7 +7,7 @@ namespace LiteraturePlatformWebApi.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class PlatformController
+    public class PlatformController : Controller
     {
         private LiteraturePlatformContext _context;
         public PlatformController(LiteraturePlatformContext context)
@@ -108,15 +108,61 @@ namespace LiteraturePlatformWebApi.Controllers
 
         [HttpPost]
         [Route("AddComment")]
-        public async Task<IResult> AddComment(Comment text)
-        {            
-            var comp = await _context.Composition.FirstOrDefaultAsync(e=>e.CompositionId == text.TextId);
-            _context.Add(text);
-            comp.Text = text;
+        public async Task<IResult> AddComment(Comment comment)
+        {
+            var comp = await _context.Composition.FirstOrDefaultAsync(e => e.CompositionId == comment.CommentId);
+            comment.CommentId = 0;
+            comment.User = await _context.Users.FirstOrDefaultAsync(e=>e.UserId == comment.UserId);
+            _context.Add(comment);
+
+            if (comp.Comments == null)
+            {
+                comp.Comments = new List<Comment>();
+            }
+            comp.Comments.Add(comment);
 
             await _context.SaveChangesAsync();
 
             return Results.Ok();
+        }
+
+        [HttpGet]
+        [Route("GetTop50Rating")]
+        public async Task<ActionResult<IEnumerable<Composition>>> GetTop50Rating()
+        {
+            return await _context.Composition
+                .OrderByDescending(x => x.Rating)
+                .Include(e => e.User)
+                .Include(e => e.Text)
+                .Include(e => e.Comments)
+                .Include(e => e.Genre)
+                .ToListAsync();
+        }
+
+        [HttpGet]
+        [Route("GetTop50Comments")]
+        public async Task<ActionResult<IEnumerable<Composition>>> GetTop50Comments()
+        {
+            return await _context.Composition
+                .OrderByDescending(x => x.Comments.Count())
+                .Include(e => e.User)
+                .Include(e => e.Text)
+                .Include(e => e.Comments)
+                .Include(e => e.Genre)
+                .ToListAsync();
+        }
+
+        [HttpGet]
+        [Route("FindByGenre/{id}")]
+        public async Task<ActionResult<IEnumerable<Composition>>> FindByGenre(int id)
+        {
+            return await _context.Composition
+                .Where(x => x.GenreId == id)
+                .Include(e => e.User)
+                .Include(e => e.Text)
+                .Include(e => e.Comments)
+                .Include(e => e.Genre)
+                .ToListAsync();
         }
     }
 }

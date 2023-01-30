@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LiteraturePlatformWebApi.Migrations
 {
     [DbContext(typeof(LiteraturePlatformContext))]
-    [Migration("20230124175605_composEdit")]
-    partial class composEdit
+    [Migration("20230130122038_init")]
+    partial class init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -40,9 +40,14 @@ namespace LiteraturePlatformWebApi.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("UserId")
+                        .HasColumnType("int");
+
                     b.HasKey("CommentId");
 
                     b.HasIndex("CompositionId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Comments");
                 });
@@ -136,11 +141,9 @@ namespace LiteraturePlatformWebApi.Migrations
 
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Login")
-                        .IsRequired()
                         .HasMaxLength(30)
                         .HasColumnType("nvarchar(30)");
 
@@ -158,6 +161,12 @@ namespace LiteraturePlatformWebApi.Migrations
                     b.HasOne("LiteraturePlatformWebApi.Models.Composition", null)
                         .WithMany("Comments")
                         .HasForeignKey("CompositionId");
+
+                    b.HasOne("LiteraturePlatformWebApi.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("LiteraturePlatformWebApi.Models.Composition", b =>

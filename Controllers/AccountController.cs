@@ -1,15 +1,18 @@
-﻿using LiteraturePlatformWebApi.Data;
+﻿using Azure.Core;
+using LiteraturePlatformWebApi.Data;
 using LiteraturePlatformWebApi.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
+using System.Net;
 using System.Security.Claims;
-
 namespace LiteraturePlatformWebApi.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class AccountController
+    public class AccountController : Controller
     {
         private LiteraturePlatformContext _context;
         public AccountController(LiteraturePlatformContext context)
@@ -36,10 +39,10 @@ namespace LiteraturePlatformWebApi.Controllers
                 
                 var encodedJwt = new JwtSecurityTokenHandler().WriteToken(jwt);
 
-                return encodedJwt;
+                return Ok(encodedJwt);
 
             }
-            return null;
+            return BadRequest("User doesn`t exist");
         }
         private ClaimsIdentity GetIdentity(User user)
         {
@@ -56,8 +59,13 @@ namespace LiteraturePlatformWebApi.Controllers
         }
         [HttpPost]
         [Route("Register")]
-        public async Task<IResult> Register(RegisterModel registerModel)
+        public async Task<ActionResult<string>> Register(RegisterModel registerModel)
         {
+            var a = _context.Users.Where(e => e.Email == registerModel.Email).FirstOrDefaultAsync();
+            if (a != null)
+            {
+                return BadRequest("User with this email already exist");
+            }
 
             User user = new User()
             {
@@ -69,9 +77,7 @@ namespace LiteraturePlatformWebApi.Controllers
             await _context.AddAsync(user);
             await _context.SaveChangesAsync();
 
-            return Results.Ok();
+            return Ok("nice");
         }
-
-
     }
 }
