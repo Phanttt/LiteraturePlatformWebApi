@@ -1,12 +1,9 @@
-﻿using Azure.Core;
-using LiteraturePlatformWebApi.Data;
+﻿using LiteraturePlatformWebApi.Data;
 using LiteraturePlatformWebApi.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
-using System.Net;
 using System.Security.Claims;
 namespace LiteraturePlatformWebApi.Controllers
 {
@@ -24,7 +21,7 @@ namespace LiteraturePlatformWebApi.Controllers
         public ActionResult<string> Login(User user)
         {
             var us = _context.Users.FirstOrDefault(x => x.Email == user.Email && x.Password == user.Password);
-            if (us!=null)
+            if (us != null)
             {
                 var identity = GetIdentity(us); // аутентификация
                 var now = DateTime.UtcNow;
@@ -42,7 +39,7 @@ namespace LiteraturePlatformWebApi.Controllers
                 return Ok(encodedJwt);
 
             }
-            return BadRequest("User doesn`t exist");
+            return BadRequest("Email or password is incorrect");
         }
         private ClaimsIdentity GetIdentity(User user)
         {
@@ -61,7 +58,7 @@ namespace LiteraturePlatformWebApi.Controllers
         [Route("Register")]
         public async Task<ActionResult<string>> Register(RegisterModel registerModel)
         {
-            var a = _context.Users.Where(e => e.Email == registerModel.Email).FirstOrDefaultAsync();
+            User a = await _context.Users.Where(e => e.Email == registerModel.Email).FirstOrDefaultAsync();
             if (a != null)
             {
                 return BadRequest("User with this email already exist");

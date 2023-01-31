@@ -4,6 +4,7 @@ using LiteraturePlatformWebApi.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LiteraturePlatformWebApi.Migrations
 {
     [DbContext(typeof(LiteraturePlatformContext))]
-    partial class LiteraturePlatformContextModelSnapshot : ModelSnapshot
+    [Migration("20230131094651_rating")]
+    partial class rating
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -111,32 +114,6 @@ namespace LiteraturePlatformWebApi.Migrations
                     b.ToTable("Genres");
                 });
 
-            modelBuilder.Entity("LiteraturePlatformWebApi.Models.Rating", b =>
-                {
-                    b.Property<int>("RatingId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("RatingId"));
-
-                    b.Property<int>("CompositionId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Rate")
-                        .HasColumnType("int");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("RatingId");
-
-                    b.HasIndex("CompositionId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Rating");
-                });
-
             modelBuilder.Entity("LiteraturePlatformWebApi.Models.Text", b =>
                 {
                     b.Property<int>("TextId")
@@ -214,25 +191,6 @@ namespace LiteraturePlatformWebApi.Migrations
                     b.Navigation("Genre");
 
                     b.Navigation("Text");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("LiteraturePlatformWebApi.Models.Rating", b =>
-                {
-                    b.HasOne("LiteraturePlatformWebApi.Models.Composition", "Composition")
-                        .WithMany()
-                        .HasForeignKey("CompositionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("LiteraturePlatformWebApi.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Composition");
 
                     b.Navigation("User");
                 });

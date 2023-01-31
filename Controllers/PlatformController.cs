@@ -34,6 +34,7 @@ namespace LiteraturePlatformWebApi.Controllers
                 .Include(e => e.User)
                 .Include(e => e.Text)
                 .Include(e => e.Comments)
+                .ThenInclude(e=>e.User)
                 .FirstOrDefaultAsync();
         }
 
@@ -109,16 +110,19 @@ namespace LiteraturePlatformWebApi.Controllers
         [HttpPost]
         [Route("AddComment")]
         public async Task<IResult> AddComment(Comment comment)
-        {
+        {          
             var comp = await _context.Composition.FirstOrDefaultAsync(e => e.CompositionId == comment.CommentId);
             comment.CommentId = 0;
-            comment.User = await _context.Users.FirstOrDefaultAsync(e=>e.UserId == comment.UserId);
-            _context.Add(comment);
+            User user = await _context.Users.FirstOrDefaultAsync(e => e.UserId == comment.UserId);
 
             if (comp.Comments == null)
             {
                 comp.Comments = new List<Comment>();
             }
+
+            comment.User = user;
+            _context.Add(comment);
+
             comp.Comments.Add(comment);
 
             await _context.SaveChangesAsync();
@@ -163,6 +167,69 @@ namespace LiteraturePlatformWebApi.Controllers
                 .Include(e => e.Comments)
                 .Include(e => e.Genre)
                 .ToListAsync();
+        }
+        [HttpGet]
+        [Route("Rate/{composId}/{userId}/{rate}")]
+        public async Task<ActionResult> Rate(int composId, int userId, int rate)
+        {
+            Rating exist = await _context.Rating.FirstOrDefaultAsync(e => e.UserId == userId && e.CompositionId == composId);
+            if (exist == null)
+            {
+                Rating rating = new Rating()
+                {
+                    CompositionId = composId,
+                    UserId = userId,
+                    Rate = rate
+                };
+                await _context.Rating.AddAsync(rating); 
+            }
+            else
+            {
+                exist.Rate = rate;
+            }
+
+            await _context.SaveChangesAsync();
+
+            double sumRate = _context.Rating.Where(e => e.CompositionId == composId).Average(e => e.Rate);
+            Composition composition = await _context.Composition.FirstOrDefaultAsync(e => e.CompositionId == composId);
+            composition.Rating = sumRate;
+
+            await _context.SaveChangesAsync();
+
+            return Ok();
+        }
+
+        [HttpGet]
+        [Route("CurrRate/{userId}/{composId}")]
+        public async Task<ActionResult<int>> CurrRate(int userId, int composId)
+        {
+            Rating rating = await _context.Rating.Where(e => e.UserId == userId && e.CompositionId == composId).FirstOrDefaultAsync();
+            return rating.Rate;
+        }
+
+        [HttpGet]
+        [Route("AccountData/{id}")]
+        public async Task<ActionResult<User>> AccountData(int id)
+        {
+            return await _context.Users.FirstOrDefaultAsync(e => e.UserId == id);
+        }
+
+        [HttpPost]
+        [Route("ChangeData")]
+        public async Task<ActionResult<string>> ChangeData(User user)
+        {
+            await _context.Users.AddAsync(user);
+            await _context.SaveChangesAsync();
+            return Ok("Data was successfully changed");
+        }
+
+        [HttpGet]
+        [Route("DeleteUser/{id}")]
+        public async Task<ActionResult<string>> DeleteUser(int id)
+        {
+            User user = await _context.Users.FirstOrDefaultAsync(e => e.UserId == id);
+            _context.Users.Remove(user);
+            return Ok("Data was successfully deleted");
         }
     }
 }

@@ -15,6 +15,7 @@ namespace LiteraturePlatformWebApi.Data
         public DbSet<Text> Texts { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<Composition> Composition { get; set; }
+        public DbSet<Rating> Rating { get; set; }
 
     }
 }
