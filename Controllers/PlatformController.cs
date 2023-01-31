@@ -157,6 +157,32 @@ namespace LiteraturePlatformWebApi.Controllers
         }
 
         [HttpGet]
+        [Route("SearchByAutor/{text}")]
+        public async Task<ActionResult<IEnumerable<Composition>>> SearchByAutor(string text)
+        {
+            return await _context.Composition               
+                .Include(e => e.User)
+                .Include(e => e.Text)
+                .Include(e => e.Comments)
+                .Include(e => e.Genre)
+                .Where(e => e.User.Login == text)
+                .ToListAsync();
+        }
+
+        [HttpGet]
+        [Route("SearchByTitle/{text}")]
+        public async Task<ActionResult<IEnumerable<Composition>>> SearchByTitle(string text)
+        {
+            return await _context.Composition
+                .Where(e => e.Title == text)
+                .Include(e => e.User)
+                .Include(e => e.Text)
+                .Include(e => e.Comments)
+                .Include(e => e.Genre)
+                .ToListAsync();
+        }
+
+        [HttpGet]
         [Route("FindByGenre/{id}")]
         public async Task<ActionResult<IEnumerable<Composition>>> FindByGenre(int id)
         {
@@ -218,18 +244,30 @@ namespace LiteraturePlatformWebApi.Controllers
         [Route("ChangeData")]
         public async Task<ActionResult<string>> ChangeData(User user)
         {
-            await _context.Users.AddAsync(user);
+            User a = await _context.Users.Where(e => e.Email == user.Email).FirstOrDefaultAsync();
+            if (a != null)
+            {
+                return BadRequest("User with this email already exist");
+            }
+
+            User newUser = await _context.Users.Where(e => e.UserId == user.UserId).FirstOrDefaultAsync();
+            newUser.Email = user.Email;
+            newUser.Login = user.Login;
+            newUser.Password = user.Password;
+
+
             await _context.SaveChangesAsync();
             return Ok("Data was successfully changed");
         }
 
-        [HttpGet]
-        [Route("DeleteUser/{id}")]
-        public async Task<ActionResult<string>> DeleteUser(int id)
-        {
-            User user = await _context.Users.FirstOrDefaultAsync(e => e.UserId == id);
-            _context.Users.Remove(user);
-            return Ok("Data was successfully deleted");
-        }
+        //[HttpGet]
+        //[Route("DeleteUser/{id}")]
+        //public async Task<ActionResult<string>> DeleteUser(int id)
+        //{
+        //    User user = await _context.Users.FirstOrDefaultAsync(e => e.UserId == id);
+        //    _context.Users.Remove(user);
+        //    await _context.SaveChangesAsync();
+        //    return Ok("Data was successfully deleted");
+        //}
     }
 }
